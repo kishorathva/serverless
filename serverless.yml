@@ -1,0 +1,26 @@
+service: myserverlessproject
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  profile: serverlessUser
+
+plugins:
+  - serverless-s3-sync
+
+custom:
+  s3Sync:
+    - bucketName: myseverlessprojectuploadbucket-123123
+      localDir: UploadData
+
+functions:
+  hello:
+    handler: handler.hello
+# you can add CloudFormation resource templates here
+resources:
+ Resources:
+    DemoBucketUpload:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: myseverlessprojectuploadbucket-123123
