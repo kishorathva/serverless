@@ -1,5 +1,5 @@
 service: myserverlessproject
-frameworkVersion: '3'
+frameworkVersion: "3"
 
 provider:
   name: aws
@@ -8,6 +8,10 @@ provider:
 
 plugins:
   - serverless-s3-sync
+  - serverless-webpack
+
+package:
+  individually: true
 
 custom:
   s3Sync:
@@ -15,11 +19,16 @@ custom:
       localDir: UploadData
 
 functions:
-  hello:
-    handler: handler.hello
+  getUser:
+    handler: lambdas/getUser.handler
+    events:
+      - http:
+          path: get-user/{ID}
+          method: GET
+          cors: true
 # you can add CloudFormation resource templates here
 resources:
- Resources:
+  Resources:
     DemoBucketUpload:
       Type: AWS::S3::Bucket
       Properties:
