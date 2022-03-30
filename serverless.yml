@@ -5,6 +5,13 @@ provider:
   name: aws
   runtime: nodejs12.x
   profile: serverlessUser
+  environment:
+    tableName: ${self:custom.tableName}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource: "*"
 
 plugins:
   - serverless-s3-sync
@@ -14,17 +21,32 @@ package:
   individually: true
 
 custom:
+  tableName: player-points
   s3Sync:
     - bucketName: myseverlessprojectuploadbucket-123123
       localDir: UploadData
 
 functions:
   getUser:
-    handler: lambdas/getUser.handler
+    handler: lambdas/endpoints/getUser.handler
     events:
       - http:
           path: get-user/{ID}
           method: GET
+          cors: true
+  getPlayerScore:
+    handler: lambdas/endpoints/getPlayerScore.handler
+    events:
+      - http:
+          path: get-player-score/{ID}
+          method: GET
+          cors: true
+  createPlayerScore:
+    handler: lambdas/endpoints/createPlayerScore.handler
+    events:
+      - http:
+          path: create-player-score/{ID}
+          method: POST
           cors: true
 # you can add CloudFormation resource templates here
 resources:
@@ -33,3 +55,14 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: myseverlessprojectuploadbucket-123123
+    MyDynamoDbTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: ID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ID
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
