@@ -5,12 +5,15 @@ provider:
   name: aws
   runtime: nodejs12.x
   profile: serverlessUser
+  region: us-east-1
   environment:
     tableName: ${self:custom.tableName}
+    bucketName: ${self:custom.bucketName}
   iamRoleStatements:
     - Effect: Allow
       Action:
         - dynamodb:*
+        - s3:*
       Resource: "*"
 
 plugins:
@@ -22,8 +25,9 @@ package:
 
 custom:
   tableName: player-points
+  bucketName: myseverlessprojectuploadbucket-123123
   s3Sync:
-    - bucketName: myseverlessprojectuploadbucket-123123
+    - bucketName: ${self:custom.bucketName}
       localDir: UploadData
 
 functions:
@@ -48,13 +52,28 @@ functions:
           path: create-player-score/{ID}
           method: POST
           cors: true
+  createFile:
+    handler: lambdas/endpoints/createFile.handler
+    events:
+      - http:
+          path: create-file/{fileName}
+          method: POST
+          cors: true
+  getFile:
+    handler: lambdas/endpoints/getFile.handler
+    events:
+      - http:
+          path: get-file/{fileName}
+          method: get
+          cors: true
+  
 # you can add CloudFormation resource templates here
 resources:
   Resources:
     DemoBucketUpload:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: myseverlessprojectuploadbucket-123123
+        BucketName: ${self:custom.bucketName}
     MyDynamoDbTable:
       Type: AWS::DynamoDB::Table
       Properties:
