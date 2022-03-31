@@ -88,6 +88,18 @@ functions:
           path: get-file/{fileName}
           method: get
           cors: true
+  proxy:
+    handler: lambdas/endpoints/proxy.handler
+    events:
+      - http:
+          path: chuck-norris/{proxy+}
+          method: ANY
+          integration: http-proxy
+          request:
+            uri: http://api.icndb.com/{proxy}
+            parameters:
+              paths:
+                proxy: true
 
 # you can add CloudFormation resource templates here
 resources:
